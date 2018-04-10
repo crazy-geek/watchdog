@@ -5,11 +5,10 @@ var User = require('../user.js')
 
 var user = new User();
 
-routes.get ('/save', ()=>{
-    user.save({'name':'jijo'},(err,res)=>{
-        console.log(err, res);
+routes.get ('/save', (req, res)=>{
+    user.save({'name':'jijo'},(err,result)=>{
+        console.log(err, result);
     })
 });
-
 
 module.exports = routes;
