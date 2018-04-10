@@ -11,7 +11,7 @@ User Registration
 Sync Manager - GraphDb Sync
 
 Authenticate User
-	--Generate SecrectKey
+	GenerateSecrectKey
 	Signin
 	Signout
 	
