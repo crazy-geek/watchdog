@@ -1,8 +1,33 @@
+var mongoose = require('mongoose');
+var passport = require('passport');
+var localStrategy = require('passport-local').Strategy;
+var User = require('./models/user');
 
 module.exports = function(data, callback){
-     this.save = (data,callback) =>{
-        return callback(null,'success');
+    mongoose.connect('mongodb://localhost:27017/authentication',(err)=>{
+        if(err)
+            console.log(err);
+    })
+     this.add = (data,callback) =>{
+        var user = User.findOne({'email':'jijojoy@gmail.com'},(err, result) =>{
+            if(err){
+                return callback(err, null);
+            }
+            if(result != null)
+                return callback('user already exists', null);
+        });        
+
+        var newuser = new User({
+            full_name:'Jijo Joy',
+            phone: '1234567',
+            email:'jijojoy@gmail.com',
+            password:'pwd'
+        }).save((err,res) => {
+            callback(err,res);
+        })
     };
+
+
      this.remove = (id, callback)=>{
 
      };
@@ -13,6 +38,12 @@ module.exports = function(data, callback){
 
      this.findAll = (limit, page) => {
 
+    };
+
+    this.login = (data, callback)=>{
+        passport.authenticate(localStrategy, 
+                            {successRedirect:'/', failiourRedirect:'/user/login1'});
+        callback(null, 'success');
     }
 };
 //module.exports = {save,remove,findById,findAll}
