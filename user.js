@@ -14,8 +14,9 @@ module.exports = function (data, callback) {
         }
     )
     this.add = (data, callback) => {
+        
         var user = User.findOne({
-            'email': 'jijojoy1@gmail.com'
+            'email': data.email
         }, (err, result) => {
             //console.log(result);
             if (err) {
@@ -24,13 +25,13 @@ module.exports = function (data, callback) {
             if (result !== null) 
                 return callback('user already exists', null);
             else {
-                var newuser = new User();
-                    newuser.full_name = 'Jijo Joy',
-                    newuser.phone = '1234567',
-                    newuser.email = 'jijojoy1@gmail.com',
-                    newuser.password = auth.generateHash('pwd');
-
-                    newuser.save((err, res) => {
+                var newuser = new User({
+                    full_name : data.full_name,
+                    email: data.email,
+                    phone:data.phone,
+                    password: auth.generateHash(data.password)
+                });
+                newuser.save((err, res) => {
                         return callback(err, res);
                     });
                 }
@@ -46,12 +47,12 @@ module.exports = function (data, callback) {
 
     this.login = (data, callback) => {
         User.findOne({
-            email: 'jijojoy1@gmail.com'
+            email: data.email
         }, (err, user) => {
             if (!user) 
                 return callback(401, null);
            
-            if (!auth.varifyPassword('pwd', user)) 
+            if (!auth.varifyPassword(data.password, user)) 
                 return callback(401, null);
 
             var userInfo = user.toObject();
@@ -63,19 +64,4 @@ module.exports = function (data, callback) {
             });
         });
     };
-
-    passport.use('local', new localStrategy({
-        usernameField: 'email',
-        passwordField: 'password',
-        session: false
-    }, (username, password, done) => {
-        User.findOne({
-            email: 'jijojoy1@gmail.com'
-        }, (err, result) => {
-            if (!result) 
-                return done(null, false);
-            if (!result.varifyPassword('pwd')) 
-                return done(null, result)
-        });
-    }));
 }
