@@ -56,7 +56,7 @@ module.exports = function (data, callback) {
 
             var userInfo = user.toObject();
             delete userInfo['password']
-            var token = jwt.sign(userInfo, 'bolder', {expiresIn:'30 s'})
+            var token = jwt.sign(userInfo, 'bolder', {expiresIn:'1h'})
             return callback(null, {
                 'success': true,
                 'token': token
