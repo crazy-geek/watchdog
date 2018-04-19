@@ -16,6 +16,7 @@ routes.get ('/save', (req, res)=>{
 });
 
 routes.get('/login', (req,res) => {
+
     user.login({}, (err, result) => {
         res.status(200).send({"Error":err, 'result': result})
     })
