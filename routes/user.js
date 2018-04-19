@@ -6,7 +6,7 @@ var User = require('../user.js')
 var user = new User();
 
 routes.get ('/save', (req, res)=>{
-    user.add({'name':'jijo'},(err,result)=>{
+    user.add({},(err,result)=>{
         res.set('Content-Type', 'application/json');
         if(err)
             res.status(500).json({'error':err,'result':result});

@@ -9,22 +9,26 @@ module.exports = function(data, callback){
             console.log(err);
     })
      this.add = (data,callback) =>{
-        var user = User.findOne({'email':'jijojoy@gmail.com'},(err, result) =>{
+        var user = User.findOne({'email':'jijojoy1@gmail.com'},(err, result) =>{
+            console.log(result);
             if(err){
                 return callback(err, null);
             }
-            if(result != null)
+            if(result !== null)
                 return callback('user already exists', null);
+            else{
+                var newuser = new User({
+                    full_name:'Jijo Joy',
+                    phone: '1234567',
+                    email:'jijojoy1@gmail.com',
+                    password:'pwd'
+                }).save((err,res) => {
+                    callback(err,res);
+                })
+            }
         });        
 
-        var newuser = new User({
-            full_name:'Jijo Joy',
-            phone: '1234567',
-            email:'jijojoy@gmail.com',
-            password:'pwd'
-        }).save((err,res) => {
-            callback(err,res);
-        })
+        
     };
 
 
