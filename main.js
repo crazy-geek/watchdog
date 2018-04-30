@@ -2,8 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan =  require('morgan');
 const mongoose = require('mongoose');
+require('dotenv').config();
 
-mongoose.connect('mongodb://localhost:27017/bolderAuthentication');
+mongoose.Promise = global.Promise; //to avoid runtime warning, if you want you can use custom mongoose promises, here using ES6 promise
+mongoose.connect('mongodb://localhost:27017/bolderauthentication');
 
 const app = express();
 
@@ -11,7 +13,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 
-//app.use(require('./routes'));
+//app.use(require('./routes'))
 
 //# routes
 app.use('/user', require('./routes/users'))
