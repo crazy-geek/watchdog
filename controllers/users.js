@@ -27,7 +27,7 @@ module.exports = {
     },
 
     signIn : async(req, res, next) => {
-
+        res.status(200).json({msg:'login successful'});
     },
 
     secret: async (req,res,next) => {
