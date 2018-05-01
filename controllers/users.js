@@ -1,5 +1,7 @@
+
 const JWT = require('jsonwebtoken');
 const User = require('../models/user');
+const otp = require('../helpers/otphelper');
 
 signToken = user => {
     return JWT.sign({
@@ -33,5 +35,22 @@ module.exports = {
 
     secret: async (req,res,next) => {
         res.status(200).json({msg:'You got the secret'});
+    },
+
+    getOTP: async (req, res, next) => {
+        let email = req.body.email;
+        const foundUesr = await User.findOne({email});
+        if(!foundUesr)
+            return res.status(401).json({error:'no user found!'});
+        let phone = foundUesr.phone.replace('+','');
+        const OTP = otp.generate();
+        const result = await otp.send(`Bolder One Time Password for reset your password is ${OTP}`, "Bolder", phone);
+        res.json(result);
+    },
+
+    validateOTP: async (req, res, next) => {
+        let userotp = req.body.otp;
+        res.send(otp.verify(userotp));
     }
+
 };

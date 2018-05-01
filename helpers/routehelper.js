@@ -24,6 +24,12 @@ module.exports ={
        signInSchema: joi.object().keys({
            email:joi.string().required(),
            password:joi.string().required()
+       }),
+       getOTPSchema: joi.object().keys({
+           email:joi.string().required()
+       }),
+       validateOTPSchema: joi.object().keys({
+           otp:joi.string().required()
        })
     }
 
