@@ -27,6 +27,10 @@ router.route('/verify')
     .post(validateBody(schemas.validateOTPSchema),
     userController.validateOTP);
 
+router.route('/updatepassword')
+    .post(validateBody(schemas.signInSchema),
+    userController.updatePassword);
+
 
 
 module.exports = router;

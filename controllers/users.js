@@ -1,5 +1,7 @@
 
 const JWT = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
 const User = require('../models/user');
 const otp = require('../helpers/otphelper');
 
@@ -51,6 +53,25 @@ module.exports = {
     validateOTP: async (req, res, next) => {
         let userotp = req.body.otp;
         res.send(otp.verify(userotp));
+    },
+
+    updatePassword: async (req, res, next) => {
+        let email = req.body.email;
+        let newPassword = req.body.password;
+        let query = {email}
+
+        //const salt = await bcrypt.genSalt(10);
+        //newPassword = await bcrypt.hash(newPassword,salt);
+        //let foundUser = await User.findOneAndUpdate( {email}, {password:newPassword},{upsert:true});
+
+        let foundUser = await User.findOne(query);
+        if(!foundUser)
+            return res.status(401).json({error: 'no user found!'});
+
+        foundUser.password = newPassword;
+        foundUser = await foundUser.save()
+       
+        return res.status(200).json({user:foundUser});
     }
 
 };
