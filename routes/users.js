@@ -31,6 +31,9 @@ router.route('/updatepassword')
     .post(validateBody(schemas.signInSchema),
     userController.updatePassword);
 
-
+router.route('/oauth/google')
+    .post(validateBody(schemas.googleSignInSchema),
+    passport.authenticate('google-plus', {session:false}),
+    userController.googleAuthentication);
 
 module.exports = router;

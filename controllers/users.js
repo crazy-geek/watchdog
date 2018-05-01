@@ -72,6 +72,10 @@ module.exports = {
         foundUser = await foundUser.save()
        
         return res.status(200).json({user:foundUser});
+    },
+
+    googleAuthentication: async (req, res, next) =>{
+        
     }
 
 };
