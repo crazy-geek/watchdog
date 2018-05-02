@@ -10,7 +10,7 @@ signToken = user => {
             iss:process.env.ISSUER,
             sub:user.id,
             exp: new Date().setDate(new Date().getDate() + 1)
-        }, process.env.SECRET);
+        }, process.env.APP_SECRET);
 }
 
 module.exports = {

@@ -1,10 +1,10 @@
 const AWS = require('aws-sdk');
 const speakeasy = require('speakeasy');
 
-AWS.config.region = 'us-west-2'
+AWS.config.region = process.env.AWS_REGION
 AWS.config.update({
-    accessKeyId: 'AKIAI72OPMFJM6RM4MEA',
-    secretAccessKey: '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'  
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey : process.env.AWS_ACCESS_KEY
 });
 
 var sns = new AWS.SNS();
@@ -20,8 +20,8 @@ sns.setSMSAttributes({
 
 module.exports = {
     generate: () => {
-       let secret = 'MYTOPSECRET';
-       let token = speakeasy.totp({
+        let secret = process.env.APP_OTP_SECRET;
+        let token = speakeasy.totp({
         secret: secret.base32,
         encoding: 'base32'
         //time: new Date().getTime() + (60*60*60*60)
@@ -29,7 +29,7 @@ module.exports = {
        return token;
     },
     verify: otp =>{
-        let secret = 'MYTOPSECRET';
+        let secret = process.env.APP_OTP_SECRET;
         let isvalid = speakeasy.totp.verify({
             secret: secret.base32,
             encoding: 'base32',

@@ -37,8 +37,8 @@ passport.use(new jwtStrategy({
 }));
 
 passport.use('google-plus', new googleStrategy({
-    clientID:'655933511207-k33ac2rpqdre9r78a8pjngh0pdujt19l.apps.googleusercontent.com',
-    clientSecret:'SIj-meBVOgIXq4TBsYc5yTem'
+    clientID:process.env.GOOGLE_CLIENT_ID ,
+    clientSecret : process.env.GOOGLE_CLIENT_SECRET
 }, async (accesstoken, refreshtoken, profile, done)=>{
     console.log(profile);
 }));
