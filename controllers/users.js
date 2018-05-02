@@ -10,7 +10,7 @@ signToken = user => {
             iss:process.env.ISSUER,
             sub:user.id,
             exp: new Date().setDate(new Date().getDate() + 1)
-        }, process.env.APP_SECRET);
+        }, process.env.APP_JWT_SECRET);
 }
 
 module.exports = {
@@ -47,7 +47,7 @@ module.exports = {
         let phone = foundUesr.phone.replace('+','');
         const OTP = otp.generate();
         const result = await otp.send(`Bolder One Time Password for reset your password is ${OTP}`, "Bolder", phone);
-        res.json(result);
+        res.status(200).send(result.response.status);
     },
 
     validateOTP: async (req, res, next) => {

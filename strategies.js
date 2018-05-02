@@ -24,7 +24,7 @@ passport.use(new localStrategy({
 
 passport.use(new jwtStrategy({
     jwtFromRequest:ExtractJwt.fromHeader('authorization'),
-    secretOrKey:process.env.SECRET
+    secretOrKey : process.env.APP_JWT_SECRET
 }, async (paylod,done) => {
     try{
         const foundUser = await User.findById(paylod.sub);

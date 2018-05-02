@@ -1,10 +1,10 @@
 const AWS = require('aws-sdk');
 const speakeasy = require('speakeasy');
 
-AWS.config.region = process.env.AWS_REGION
 AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey : process.env.AWS_ACCESS_KEY
+    region : process.env.AWS_REGION,
+    accessKeyId : process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey : process.env.AWS_ACCESS_SECRET
 });
 
 var sns = new AWS.SNS();
@@ -38,17 +38,19 @@ module.exports = {
           });
         return isvalid;
     },
-    send: (message,subject,phonenumber) =>{
+    send: async (message,subject,phonenumber) =>{
         const params = {
             Message: message,
             MessageStructure: 'string',
             PhoneNumber: phonenumber,
             Subject: subject
         };
-        sns.publish(params, (error, data) => {
-            if(error)
-                return { error:error, data:null };
-            return { error:null, data:data };
-        })
+        try{
+            let result = await sns.publish(params);
+            console.log (result.response)
+            return result
+        }catch(error){
+            return error
+        }
     }
 };
