@@ -1,8 +1,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-optSchema = new Schema({
-    userId:string,
-    OTP:number
+otpSchema = new Schema({
+    userId:String,
+    email:String,
+    OTP:String,
+    issuedOn: {
+        type:Date,
+        default:new Date().getTime()
+    }
+});
 
-})
+module.exports =  mongoose.model('otp', otpSchema); 

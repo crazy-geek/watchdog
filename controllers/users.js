@@ -3,6 +3,7 @@ const JWT = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 const User = require('../models/user');
+const OTP = require('../models/otp');
 const otp = require('../helpers/otphelper');
 
 signToken = user => {
@@ -41,18 +42,33 @@ module.exports = {
 
     getOTP: async (req, res, next) => {
         let email = req.body.email;
-        const foundUesr = await User.findOne({email});
-        if(!foundUesr)
+        const foundUser = await User.findOne({email});
+        if(!foundUser)
             return res.status(401).json({error:'no user found!'});
-        let phone = foundUesr.phone.replace('+','');
-        const OTP = otp.generate();
-        const result = await otp.send(`Bolder One Time Password for reset your password is ${OTP}`, "Bolder", phone);
-        res.status(200).send(result.response.status);
+        let phone = foundUser.phone.replace('+','');
+        const newOTP =  otp.generate();
+
+        let foundOTP = await OTP.findOne({userId:foundUser.id});
+        if(!foundOTP){
+            foundOTP = new OTP();
+            foundOTP.userId = foundUser.id;
+            foundOTP.email = foundUser.email;
+            foundOTP.OTP = newOTP;
+            foundOTP.save();
+        }else {
+            foundOTP.OTP = newOTP;
+            foundOTP.issuedOn = new Date().getTime();
+            foundOTP.save();
+        }   
+        
+        const result = await otp.send(`Hi ${foundUser.name}, Your Bolder One Time Token for reset your password is ${newOTP}`, "Bolder", phone);
+        res.status(200).send(result);
     },
 
     validateOTP: async (req, res, next) => {
-        let userotp = req.body.otp;
-        res.send(otp.verify(userotp));
+        let userotp = req.body.token;
+        let email = req.body.email;
+        res.status(200).send(await otp.verify(email, userotp));
     },
 
     updatePassword: async (req, res, next) => {

@@ -1,11 +1,10 @@
 const AWS = require('aws-sdk');
 const speakeasy = require('speakeasy');
-const OTP = require('../models/otp');
 
-AWS.config.region = process.env.AWS_REGION
+AWS.config.region = 'us-west-2'
 AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_ACCESS_SECRET
+    accessKeyId: 'AKIAI72OPMFJM6RM4MEA',
+    secretAccessKey: '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'  
 });
 
 var sns = new AWS.SNS();
@@ -21,7 +20,7 @@ sns.setSMSAttributes({
 
 module.exports = {
     generate: () => {
-       let secret = process.env.APP_OTP_SECRET;
+       let secret = 'MYTOPSECRET';
        let token = speakeasy.totp({
         secret: secret.base32,
         encoding: 'base32'
@@ -29,14 +28,8 @@ module.exports = {
        });
        return token;
     },
-
-    verify: async (email, otp) =>{
-        let foundOTP = await OTP.find({email:email, OTP:otp});
-        console.log(foundOTP, otp)
-        if(!foundOTP)
-            return false;
-
-        let secret = process.env.APP_OTP_SECRET;
+    verify: otp =>{
+        let secret = 'MYTOPSECRET';
         let isvalid = speakeasy.totp.verify({
             secret: secret.base32,
             encoding: 'base32',
@@ -45,20 +38,18 @@ module.exports = {
           });
         return isvalid;
     },
-    
-    send: async (message,subject,phonenumber) =>{
+    send: (message,subject,phonenumber) =>{
         const params = {
             Message: message,
             MessageStructure: 'string',
             PhoneNumber: phonenumber,
             Subject: subject
         };
-        await sns.publish(params, (error, data) => {
+        sns.publish(params, (error, data) => {
             if(error)
                 return { error:error, data:null };
             return { error:null, data:data };
         })
-    
     }
 };
 

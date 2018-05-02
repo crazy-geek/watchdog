@@ -29,7 +29,8 @@ module.exports ={
            email:joi.string().required()
        }),
        validateOTPSchema: joi.object().keys({
-           otp:joi.string().required()
+           token:joi.string().required(),
+           email:joi.string().required()
        }),
        googleSignInSchema:joi.object().keys({
             access_token:joi.string().required()
