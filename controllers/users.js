@@ -95,8 +95,16 @@ module.exports = {
 
         foundUser.password = newPassword;
         foundUser = await foundUser.save()
-       
         return res.status(200).json({user:foundUser});
+    },
+
+    updatePhone: async (req, res, next) => {
+        let id = req.body.id;
+        let phone = req.body.phone;
+        let foundUser = await User.findByIdAndUpdate(id, {phone}, {new: true});
+        if(!foundUser)
+            return res.status(401).send('unauthorized');
+        return res.status(200).send(foundUser);
     },
 
     googleAuthentication: async (req, res, next) =>{

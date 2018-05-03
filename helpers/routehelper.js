@@ -21,6 +21,10 @@ module.exports ={
            email:joi.string().required(),
            password:joi.string().required()
        }),
+       updatePhoneSchema: joi.object().keys({
+            id :joi.string().required(),
+            phone : joi.string().required(),
+       }),
        signInSchema: joi.object().keys({
            email:joi.string().required(),
            password:joi.string().required()
