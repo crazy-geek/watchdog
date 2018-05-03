@@ -10,7 +10,11 @@ var userSchema = new schema({
         unique:true,
         lowercase:true
     },
-    password: String
+    password: String,
+    phoneVerified:{
+        type: Boolean,
+        default:false
+    }
 });
 //this method witll fire before save action
 userSchema.pre('save', async function(next){

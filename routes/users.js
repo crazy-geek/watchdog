@@ -23,9 +23,14 @@ router.route('/secret')
          userController.secret);
 
 router.route('/updatephone')
-    .post(validateBody(schemas.updatePhoneSchema),
+    .post(validateBody(schemas.verifyPhoneSchema),
+    passport.authenticate('jwt', {session: false}), 
+    userController.updateUserPhone);
+
+router.route('/verifyphone')
+    .post(validateBody(schemas.verifyPhoneSchema),
          passport.authenticate('jwt', {session: false}), 
-         userController.updatePhone);
+         userController.verifyPhone);
 
 //Send One Time Password sms to a user
 router.route('/getotp')

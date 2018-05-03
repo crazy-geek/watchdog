@@ -32,8 +32,9 @@ module.exports = {
     },
 
     signIn : async(req, res, next) => {
-        const token = signToken(req.user);
-        res.status(200).json({token});
+        let user = req.user;
+        const token = signToken(user);
+        res.status(200).json({user, token});
     },
 
     secret: async (req,res,next) => {
@@ -61,7 +62,7 @@ module.exports = {
             foundOTP.save();
         }   
         
-        const result = await otp.send(`Hi ${foundUser.name}, Your Bolder One Time Token for reset your password is ${newOTP}`, "Bolder", phone);
+        const result = await otp.send(`Hi ${foundUser.name}, Your Bolder One Time Token is ${newOTP}`, "Bolder", phone);
         res.status(200).send(result);
     },
 
@@ -80,8 +81,19 @@ module.exports = {
         res.status(400).json({error:'unauthorized'});
     },
 
+    verifyPhone: async (req, res, next) => {
+        let user = req.user;           
+            user.phoneVerified = true;
+        try{
+            let newUser = await user.save();
+            return res.status(200).json(newUser);
+        }catch(error){
+            return res.status(500).json(error);
+        }
+    },
+
     updatePassword: async (req, res, next) => {
-        let email = req.body.email;
+        let email = req.user.email;
         let newPassword = req.body.password;
         let query = {email}
 
@@ -89,7 +101,7 @@ module.exports = {
         //newPassword = await bcrypt.hash(newPassword,salt);
         //let foundUser = await User.findOneAndUpdate( {email}, {password:newPassword},{upsert:true});
 
-        let foundUser = await User.findOne(query);
+        let foundUser = req.user; //await User.findOne(query);
         if(!foundUser)
             return res.status(401).json({error: 'no user found!'});
 
@@ -98,13 +110,19 @@ module.exports = {
         return res.status(200).json({user:foundUser});
     },
 
-    updatePhone: async (req, res, next) => {
-        let id = req.body.id;
+    updateUserPhone: async (req, res, next) => {
         let phone = req.body.phone;
-        let foundUser = await User.findByIdAndUpdate(id, {phone}, {new: true});
-        if(!foundUser)
-            return res.status(401).send('unauthorized');
-        return res.status(200).send(foundUser);
+        let user = req.user;
+        if(user.phone == phone)
+            return res.status(200).json(user);
+        try{
+            user.phone = phone;
+            user.phoneVerified = false;
+            let newUser = await user.save();
+            return res.status(200).json({user:newUser});
+        }catch(error){
+            return res.status(500).send(error);
+        }
     },
 
     googleAuthentication: async (req, res, next) =>{
