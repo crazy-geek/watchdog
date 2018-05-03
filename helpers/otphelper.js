@@ -32,7 +32,6 @@ module.exports = {
 
     verify: async (email, otp) =>{
         let foundOTP = await OTP.find({email:email, OTP:otp});
-        console.log(foundOTP, otp)
         if(!foundOTP)
             return false;
 

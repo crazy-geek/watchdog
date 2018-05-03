@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 mongoose.Promise = global.Promise; //to avoid runtime warning, if you want you can use custom mongoose promises, here using ES6 promise
-mongoose.connect(process.env.MONGO_DB_CONNECT);
+mongoose.connect(process.env.MONGO_DB_CONNECT + "bolderAuthentication");
 
 const app = express();
 

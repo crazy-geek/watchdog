@@ -32,7 +32,7 @@ module.exports ={
            token:joi.string().required(),
            email:joi.string().required()
        }),
-       googleSignInSchema:joi.object().keys({
+       oAuthSignInSchema:joi.object().keys({
             access_token:joi.string().required()
        })
     }

@@ -68,7 +68,16 @@ module.exports = {
     validateOTP: async (req, res, next) => {
         let userotp = req.body.token;
         let email = req.body.email;
-        res.status(200).send(await otp.verify(email, userotp));
+        if (await otp.verify(email, userotp)){
+            try{
+                let foundUser = await User.findOne({email})
+                let token = signToken (foundUser);
+                res.status(200).json({token})
+            }catch(error){
+                 res.status(500).json({error})
+            }
+        }
+        res.status(400).json({error:'unauthorized'});
     },
 
     updatePassword: async (req, res, next) => {
@@ -92,6 +101,9 @@ module.exports = {
 
     googleAuthentication: async (req, res, next) =>{
         
-    }
+    },
 
+    facebookAuthentication: async (req, res, next) => {
+
+    }
 };
