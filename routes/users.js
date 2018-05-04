@@ -17,10 +17,6 @@ router.route('/signin')
         passport.authenticate('local', {session:false}),
         userController.signIn);
 
-//Dummy method to test the token secure access
-router.route('/secret')
-    .get(passport.authenticate('jwt',{session:false}),
-         userController.secret);
 
 router.route('/updatephone')
     .post(validateBody(schemas.verifyPhoneSchema),

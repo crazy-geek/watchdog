@@ -17,18 +17,22 @@ signToken = user => {
 module.exports = {
     signUp : async (req, res, next) => {
         const {name, email, phone, password} = req.value.body;
-        var foundUser = await User.findOne({email:email});
+        var foundUser = await User.findOne({'local.email':email});
 
         if(foundUser)
             return res.status(403).json({error: 'user already exists!'});
 
-        var user = new User({
-            name,email,phone,password
-        })
+        var user = new User();
+        user.authMethod = 'local';
+        user.local.name = name;
+        user.local.email = email;
+        user.local.phone = phone;
+        user.local.password = password; 
+         
         await user.save();
 
         const token = signToken(user);
-        res.status(200).json({token});
+        res.status(200).json({user, token});
     },
 
     signIn : async(req, res, next) => {
@@ -37,16 +41,14 @@ module.exports = {
         res.status(200).json({user, token});
     },
 
-    secret: async (req,res,next) => {
-        res.status(200).json({msg:'You got the secret'});
-    },
-
     getOTP: async (req, res, next) => {
         let email = req.body.email;
-        const foundUser = await User.findOne({email});
+        const foundUser = await User.findOne({
+            'local.email': email
+        });
         if(!foundUser)
             return res.status(401).json({error:'no user found!'});
-        let phone = foundUser.phone.replace('+','');
+        let phone = foundUser.local.phone.replace('+','');
         const newOTP =  otp.generate();
 
         let foundOTP = await OTP.findOne({userId:foundUser.id});
@@ -62,7 +64,7 @@ module.exports = {
             foundOTP.save();
         }   
         
-        const result = await otp.send(`Hi ${foundUser.name}, Your Bolder One Time Token is ${newOTP}`, "Bolder", phone);
+        const result = await otp.send(`Hi ${foundUser.local.name}, Your Bolder One Time Token is ${newOTP}`, "Bolder", phone);
         res.status(200).send(result);
     },
 
@@ -71,7 +73,9 @@ module.exports = {
         let email = req.body.email;
         if (await otp.verify(email, userotp)){
             try{
-                let foundUser = await User.findOne({email})
+                let foundUser = await User.findOne({
+                    'local.email': email
+                })
                 let token = signToken (foundUser);
                 res.status(200).json({token})
             }catch(error){
@@ -83,7 +87,7 @@ module.exports = {
 
     verifyPhone: async (req, res, next) => {
         let user = req.user;           
-            user.phoneVerified = true;
+            user.local.phoneVerified = true;
         try{
             let newUser = await user.save();
             return res.status(200).json(newUser);
@@ -95,7 +99,7 @@ module.exports = {
     updatePassword: async (req, res, next) => {
         let email = req.user.email;
         let newPassword = req.body.password;
-        let query = {email}
+       // let query = {'local.email':email}
 
         //const salt = await bcrypt.genSalt(10);
         //newPassword = await bcrypt.hash(newPassword,salt);
@@ -105,7 +109,7 @@ module.exports = {
         if(!foundUser)
             return res.status(401).json({error: 'no user found!'});
 
-        foundUser.password = newPassword;
+        foundUser.local.password = newPassword;
         foundUser = await foundUser.save()
         return res.status(200).json({user:foundUser});
     },
@@ -116,8 +120,8 @@ module.exports = {
         if(user.phone == phone)
             return res.status(200).json(user);
         try{
-            user.phone = phone;
-            user.phoneVerified = false;
+            user.local.phone = phone;
+            user.local.phoneVerified = false;
             let newUser = await user.save();
             return res.status(200).json({user:newUser});
         }catch(error){
@@ -126,7 +130,8 @@ module.exports = {
     },
 
     googleAuthentication: async (req, res, next) =>{
-        
+        let token = signToken(req.user);
+        res.status(200).json({token});
     },
 
     facebookAuthentication: async (req, res, next) => {

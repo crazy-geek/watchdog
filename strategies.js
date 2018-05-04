@@ -11,7 +11,7 @@ passport.use(new localStrategy({
     passwordField:'password'
 },async (username, password, done)=>{
     try{
-        const foundUser = await User.findOne({email:username});
+        const foundUser = await User.findOne({'local.email':username});
         if(!foundUser)
             return done(null, false);
         if(await foundUser.comparePassword(password))
@@ -40,7 +40,26 @@ passport.use('google-plus', new googleStrategy({
     clientID:process.env.GOOGLE_CLIENT_ID ,
     clientSecret : process.env.GOOGLE_CLIENT_SECRET
 }, async (accesstoken, refreshtoken, profile, done)=>{
-    console.log(profile);
+    try{
+        console.log(profile.id);
+        let foundUser = await User.findOne({
+            "google.id": profile.id
+        });
+        if (foundUser)
+               return done(null, foundUser);
+        let newUser = new User({
+            authMethod:'google',
+            google:{
+                id:profile.id,
+                emailFromGoogle:profile.emails[0].value,
+                displayName: profile.displayName
+            }
+        });
+        await newUser.save();
+        return done(null, newUser);
+    }catch(error){
+        return done(error, false, error.message)
+    }
 }));
 
 
