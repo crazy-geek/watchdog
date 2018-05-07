@@ -8,6 +8,14 @@ otpSchema = new Schema({
     issuedOn: {
         type:Date,
         default:new Date().getTime()
+    },
+    otpAction:{
+        type:String,
+        enum:['resetPassword','verifyPhone']
+    },
+    otpSendTO:{
+        type:String,
+        enum:['phone','email','both']
     }
 });
 

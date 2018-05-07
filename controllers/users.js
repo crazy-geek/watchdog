@@ -40,15 +40,21 @@ module.exports = {
         const token = signToken(user);
         res.status(200).json({user, token});
     },
-
-    getOTP: async (req, res, next) => {
+/*
+    generateOTP: async (req, res, next) => {
         let email = req.body.email;
+        let otpAction = req.body.action;
+
         const foundUser = await User.findOne({
             'local.email': email
         });
+        
         if(!foundUser)
             return res.status(401).json({error:'no user found!'});
-        let phone = foundUser.local.phone.replace('+','');
+       
+        if(otpAction == 'verifyPhone'){       
+            let phone = foundUser.local.phone.replace('+','');
+        }
         const newOTP =  otp.generate();
 
         let foundOTP = await OTP.findOne({userId:foundUser.id});
@@ -84,7 +90,7 @@ module.exports = {
         }
         res.status(400).json({error:'unauthorized'});
     },
-
+*/
     verifyPhone: async (req, res, next) => {
         let user = req.user;           
             user.local.phoneVerified = true;
@@ -96,18 +102,20 @@ module.exports = {
         }
     },
 
-    updatePassword: async (req, res, next) => {
-        let email = req.user.email;
-        let newPassword = req.body.password;
-       // let query = {'local.email':email}
-
-        //const salt = await bcrypt.genSalt(10);
-        //newPassword = await bcrypt.hash(newPassword,salt);
-        //let foundUser = await User.findOneAndUpdate( {email}, {password:newPassword},{upsert:true});
-
+    resetPassword: async (req, res, next) => {
+        let oldPassword = req.body.oldpassword;
+        let newPassword = req.body.newpassword;
+   
         let foundUser = req.user; //await User.findOne(query);
         if(!foundUser)
-            return res.status(401).json({error: 'no user found!'});
+            return res.status(401).json({
+                error: 'no user found!'
+            });
+   
+        if (!foundUser.comparePassword(oldPassword))
+             return res.status(401).json({
+                 error: 'old password does not match!'
+             });
 
         foundUser.local.password = newPassword;
         foundUser = await foundUser.save()

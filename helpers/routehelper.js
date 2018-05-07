@@ -39,6 +39,10 @@ module.exports ={
        }),
        oAuthSignInSchema:joi.object().keys({
             access_token:joi.string().required()
+       }),
+       resetPasswordSchema: joi.object().keys({
+           oldPassword: joi.string().required(),
+           newPassword: joi.string().required()
        })
     }
 

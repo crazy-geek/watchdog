@@ -41,7 +41,7 @@ router.route('/verifyotp')
 // Update User Password
 router.route('/resetpassword')
     .post(passport.authenticate('jwt', {session: false}),
-    validateBody(schemas.signInSchema),
+    validateBody(schemas.resetPasswordSchema),
     userController.updatePassword);
 
 //Google Authentication
