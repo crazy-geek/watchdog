@@ -45,7 +45,7 @@ module.exports = {
         return isvalid;
     },
     
-    send: async (message,subject,phonenumber) =>{
+    send: async (message, subject, phonenumber) =>{
         const params = {
             Message: message,
             MessageStructure: 'string',
