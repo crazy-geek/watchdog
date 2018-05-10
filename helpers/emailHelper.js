@@ -13,13 +13,9 @@ module.exports = {
        console.log(data);
         let params = {
               Destination: { 
-                      CcAddresses: [
-                            data.cc
-                      ],
-                      ToAddresses: [
-                            data.to
-                      ]
-                  },
+                      CcAddresses:data.cc,
+                      ToAddresses:data.to
+                  },    
                   Message: { 
                       Body: { 
                           Html: {
