@@ -30,7 +30,7 @@ module.exports ={
            email:joi.string().required(),
            password:joi.string().required()
        }),
-       getOTPSchema: joi.object().keys({
+       forgotPasswordSchema: joi.object().keys({
            email:joi.string().required()
        }),
        validateOTPSchema: joi.object().keys({
@@ -43,7 +43,8 @@ module.exports ={
        resetPasswordSchema: joi.object().keys({
            oldPassword: joi.string().required(),
            newPassword: joi.string().required()
-       })
+       }),
+    
     }
 
 };

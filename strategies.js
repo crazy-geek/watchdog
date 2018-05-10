@@ -23,7 +23,9 @@ passport.use(new localStrategy({
 }));
 
 passport.use(new jwtStrategy({
-    jwtFromRequest:ExtractJwt.fromHeader('authorization'),
+    jwtFromRequest: ExtractJwt.fromExtractors([(req) => {
+            return req.get('authorization') || req.query.token
+       }]),
     secretOrKey : process.env.APP_JWT_SECRET
 }, async (paylod,done) => {
     try{

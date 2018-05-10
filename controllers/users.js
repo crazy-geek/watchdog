@@ -1,10 +1,10 @@
-
 const JWT = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const passport = require('passport')
+//const passport = require('passport')
 const User = require('../models/user');
 const OTP = require('../models/otp');
 const otp = require('../helpers/otphelper');
+const emailHelper = require('../helpers/emailHelper');
 
 signToken = user => {
     return JWT.sign({
@@ -14,22 +14,22 @@ signToken = user => {
         }, process.env.APP_JWT_SECRET);
 }
 
-generateOTP = async (user, otpAction) => {
+getOTP =  (user, otpAction) => {
     const newOTP = otp.generate();
 
-    let foundOTP = await OTP.findOne({ userId: user.id });
+    let foundOTP = OTP.findOne({ userId: user.id });
     if (!foundOTP) {
         foundOTP = new OTP();
         foundOTP.userId = user.id;
         foundOTP.email = user.email;
         foundOTP.OTP = newOTP;
         foundOTO.otpAction = otpAction;
-        await foundOTP.save();
+        foundOTP.save();
     } else {
         foundOTP.OTP = newOTP;
         foundOTP.issuedOn = new Date().getTime();
         foundOTP.otpAction = otpAction;
-        await foundOTP.save();
+        foundOTP.save();
     }
     return newOTP;
     //const result = await otp.send(otpMessageText ); //`Hi ${foundUser.local.name}, Your Bolder One Time Token is ${newOTP}`, "Bolder", phone);
@@ -93,23 +93,50 @@ module.exports = {
         const result = await otp.send(`Hi ${foundUser.local.name}, Your Bolder One Time Token is ${newOTP}`, "Bolder", phone);
         res.status(200).send(result);
     },
-
-    sendResetPasswordOTP: async (req, res, next) => {
+//#region Change Password WF
+    sendChangePasswordOTP: async (req, res, next) => {
         let user = req.user;
         try{
             if (!user)
                 return res.status(401).json({
                     error: 'no user found!'
                 });
-
-            const newOTP = otp.generate(user, 'resetPassword');
-            const result = await otp.send(`Hi ${user.name}, Your Bolder One Time Token for password reset is ${newOTP}`, "Bolder", phone);
+            let phone = user.phone.replace('+','');
+            const newOTP = await getOTP(user, 'resetPassword');
+            const result = await otp.send(`Hi ${user.name}, Your One Time Token for Bolder password reset is ${newOTP}`, "Bolder", phone);
             return res.status(200).send(result);
         }catch(error){
             return res.status(500).json({error});
         }
     },
 
+    changePassword: async (req, res, next) => {
+        let oldPassword = req.body.oldpassword;
+        let newPassword = req.body.newpassword;
+        let otp = req.body.otp;
+
+        let foundUser = req.user; //await User.findOne(query);
+        if (!foundUser)
+            return res.status(401).json({
+                error: 'no user found!'
+            });
+
+        if (!foundUser.comparePassword(oldPassword))
+            return res.status(401).json({
+                error: 'old password does not match!'
+            });
+
+        if (!otp.verify(foundUser.email, otp))
+            return res.status(401).json({
+                error: 'invalid otp!'
+            });
+        foundUser.local.password = newPassword;
+        foundUser = await foundUser.save()
+        return res.status(200).json({
+            user: foundUser
+        });
+    },
+//#endregion
 
    /*validateOTP: async (req, res, next) => {
         let userotp = req.body.token;
@@ -139,44 +166,54 @@ module.exports = {
         }
     },
 
-    resetPassword: async (req, res, next) => {
-        let oldPassword = req.body.oldpassword;
-        let newPassword = req.body.newpassword;
-   
-        let foundUser = req.user; //await User.findOne(query);
-        if(!foundUser)
-            return res.status(401).json({
-                error: 'no user found!'
-            });
-   
-        if (!foundUser.comparePassword(oldPassword))
-             return res.status(401).json({
-                 error: 'old password does not match!'
-             });
-
-        foundUser.local.password = newPassword;
-        foundUser = await foundUser.save()
-        return res.status(200).json({user:foundUser});
-    },
-
-    forgotPassword: async (req, res, next) => {
+//#region ForgotPassword WF
+    sendForgotPasswordLink: async (req, res, next) => {
         let email = req.body.email;
-        let otp = req.body.otp
-        let foundUser = await (User.findOne({email})); //await User.findOne(query);
+        //let otp = req.body.otp
+        let foundUser = await (User.findOne({'local.email':email})); //await User.findOne(query);
         if(!foundUser)
             return res.status(401).json({
                 error: 'no user found!'
             });
    
         //let otp = await generateOTP(foundUser);
-        if(!await otp.verify(email,otp))
-            return res.status(401).json({error:'invalid otp'});
+        //if(!await otp.verify(email,otp))
+            //return res.status(401).json({error:'invalid otp'});
 
-        foundUser.local.password = newPassword;
-        foundUser = await foundUser.save()
-        return res.status(200).json({user:foundUser});
+        let forgotPwdToken = signToken(foundUser);
+            
+        let emailParams = {
+            cc:[],
+            to:[foundUser.local.email],
+            from:['jijo@bolder.no'],
+            subject:'Bolder password reset',
+            message:`Here is your password reset link: http://localhost:3000/forgotpassword/?token=${forgotPwdToken}. 
+                     This token is valid for 24 hours`
+        }
+        response = await emailHelper.sendMail(emailParams)
+        return res.status(200).json({response});
     },
 
+    verifyForgotPasswordLink: async (req, res, next) =>{
+        if(req.user)
+            return res.status(200).json({isValid: true, token: req.get('authorization') || req.query.token});
+        return res.status(401).json({isValid: false, token:null});
+    },
+
+    savePassword: async (req, res, next) =>{
+         let user = req.user;
+         try{
+         user.local.password = req.body.password;
+         await user.save();
+         res.status(200).json({user});
+         }catch(error){
+             res.status(500).json({error})
+         }
+        //foundUser.local.password = newPassword;
+        // foundUser = await foundUser.save()
+    },
+
+//#endregion
     updateUserPhone: async (req, res, next) => {
         let phone = req.body.phone;
         let user = req.user;
