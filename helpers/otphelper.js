@@ -45,14 +45,14 @@ module.exports = {
         return isvalid;
     },
     
-    send: async (message, subject, phonenumber) =>{
+    send: (message, subject, phonenumber) =>{
         const params = {
             Message: message,
             MessageStructure: 'string',
             PhoneNumber: phonenumber,
             Subject: subject
         };
-        await sns.publish(params, (error, data) => {
+         sns.publish(params, (error, data) => {
             if(error)
                 return { error:error, data:null };
             return { error:null, data:data };

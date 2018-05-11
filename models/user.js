@@ -11,6 +11,7 @@ var userSchema = new schema({
     local:{
         name: String,
         phone: String,
+        unverifiedPhone:String,
         email: {
             type: String,
             lowercase: true

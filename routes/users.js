@@ -55,7 +55,12 @@ router.route('/forgotpassword')
 
 router.route('/savepassword')
     .post(passport.authenticate('jwt', {session: false}),
-    userController.savePassword);
+    userController.resetPassword);
+//Change Password
+router.route('/changepassword')
+    .post(validateBody(schemas.resetPasswordSchema),
+     passport.authenticate('jwt', {session: false}),
+     userController.changePassword);
 
 //Google Authentication
 router.route('/oauth/google')
