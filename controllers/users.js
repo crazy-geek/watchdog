@@ -63,7 +63,7 @@ module.exports = {
         user.authMethod = 'local';
         user.local.name = name;
         user.local.email = email;
-        user.local.phone = phone;
+        user.local.unverifiedPhone = phone;
         user.local.password = password;
 
         await user.save();
@@ -153,25 +153,6 @@ module.exports = {
     },
     //#endregion
 
-    /*validateOTP: async (req, res, next) => {
-         let userotp = req.body.token;
-         let email = req.body.email;
-         if (await otp.verify(email, userotp)){
-             try{
-                 let foundUser = await User.findOne({
-                     'local.email': email
-                 })
-                 let token = signToken (foundUser);
-                 res.status(200).json({token})
-             }catch(error){
-                  res.status(500).json({error})
-             }
-         }
-         res.status(400).json({error:'unauthorized'});
-     },*/
-
-
-
     //#region ForgotPassword WF
     sendForgotPasswordLink: async (req, res, next) => {
         let email = req.body.email;
@@ -235,11 +216,14 @@ module.exports = {
     //#endregion of forgotpassword wf
 
     //#region Phone change WF
-    updateUserPhone: async (req, res, next) => {
+    
+
+    sendVerificationOTP: async (req, res, next) => {
         let phone = req.body.phone;
         let user = req.user;
-        if (user.local.phone == phone)
-            return res.status(200).json(user);
+        if(!user || !phone)
+            return res.status(401).json({error:'unauthorized'});
+
         try {
             let newOTP = await getOTP(user);
             if(newOTP !== null){
@@ -258,22 +242,23 @@ module.exports = {
         }
     },
 
-    verifyPhone: async (req, res, next) => {
+    changePhone: async (req, res, next) => {
         let token = req.body.token;
         let user = req.user;
         try{
             if (!user || !token)
-                return res.status(401).json({unauthorized});
+                return res.status(401).json({error:'unauthorized'});
 
             if(!otp.verify(user,token))
-                return res.status(401).json({unauthorized});
+                return res.status(401).json({error:'unauthorized'});
                 
             let validOTP = await OTP.findOne({sendTo:user.unverifiedPhone, OTP:token})    
             if(!validOTP)
-                return res.status(401).json({unauthorized})
+                return res.status(401).json({error:'unauthorized'})
             
             user.local.phoneVerified = true;
-            user.local.phone = user.unverifiedPhone;
+            user.local.phone = user.local.unverifiedPhone;
+            //user.local.unverifiedPhone = "";
             await user.save();
             return res.status(200).json(user);
         } catch (error) {

@@ -19,14 +19,14 @@ router.route('/signin')
 
 
 router.route('/updatephone')
-    .post(validateBody(schemas.verifyPhoneSchema),
+    .post(
     passport.authenticate('jwt', {session: false}), 
-    userController.updateUserPhone);
+    userController.changePhone);
 
 router.route('/verifyphone')
     .post(validateBody(schemas.verifyPhoneSchema),
          passport.authenticate('jwt', {session: false}), 
-         userController.verifyPhone);
+         userController.sendVerificationOTP);
 
 //Send One Time Password sms to a user
 // router.route('/getotp')
