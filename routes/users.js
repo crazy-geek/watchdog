@@ -14,53 +14,33 @@ router.route('/signup')
 //Login
 router.route('/signin')
     .post(validateBody(schemas.signInSchema),
-        passport.authenticate('local', {session:false}),
-        userController.signIn);
-
+    passport.authenticate('local', {session:false}),
+    userController.signIn);
 
 router.route('/updatephone')
-    .post(
+    .post(validateBody(schemas.changePhoneSchema),
     passport.authenticate('jwt', {session: false}), 
     userController.changePhone);
 
 router.route('/verifyphone')
     .post(validateBody(schemas.verifyPhoneSchema),
-         passport.authenticate('jwt', {session: false}), 
-         userController.sendVerificationOTP);
-
-//Send One Time Password sms to a user
-// router.route('/getotp')
-//      .post(validateBody(schemas.getOTPSchema), 
-//      userController.getOTP);
-
-//validate OTP   
-// router.route('/verifyotp')
-//     .post(validateBody(schemas.validateOTPSchema),
-//     userController.validateOTP);
-
-// Update User Password
-// router.route('/resetpassword')
-//     .post(passport.authenticate('jwt', {session: false}),
-//      validateBody(schemas.resetPasswordSchema),
-//      userController.updatePassword);
+    passport.authenticate('jwt', {session: false}), 
+    userController.sendVerificationOTP);
 
 // Forgotpassword
 router.route('/forgotpassword')
-    .get(passport.authenticate('jwt', {session: false}),
-     userController.verifyForgotPasswordLink);
+    .post(validateBody(schemas.forgotPasswordSchema),
+    userController.sendForgotPasswordLink);
 
 router.route('/forgotpassword')
-    .post(validateBody(schemas.forgotPasswordSchema),
-     userController.sendForgotPasswordLink);
+    .get(passport.authenticate('jwt', {session: false}),
+    userController.verifyForgotPasswordLink);
 
-router.route('/savepassword')
-    .post(passport.authenticate('jwt', {session: false}),
-    userController.resetPassword);
 //Change Password
 router.route('/changepassword')
-    .post(validateBody(schemas.resetPasswordSchema),
-     passport.authenticate('jwt', {session: false}),
-     userController.changePassword);
+    .post(validateBody(schemas.changePasswordSchema),
+    passport.authenticate('jwt', {session: false}),
+    userController.changePassword);
 
 //Google Authentication
 router.route('/oauth/google')
