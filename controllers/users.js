@@ -15,7 +15,7 @@ signToken = user => {
     }, process.env.APP_JWT_SECRET);
 }
 
-getOTP =  async (user) => {
+getOTP =  async(user) => {
     const newOTP = otp.generate();
     try{
         let foundOTP = await OTP.findOne({
@@ -39,7 +39,7 @@ getOTP =  async (user) => {
         return newOTP;
     }catch(error){
         //log error using Sentry
-        return null;
+        throw new Error(error);
     }
 }
 //#endregion Private methods
@@ -72,23 +72,15 @@ module.exports = {
         await user.save();
 
         const token = signToken(user);
-        res.status(200).json({
-            user,
-            token
-        });
+        res.status(200).json({ user, token });
     },
     //login
     signIn: async (req, res, next) => {
         let user = req.user;
         if (!user)
-            return res.status(401).json({
-                error: 'unauthorized'
-            })
+            return res.status(401).json({ error: 'unauthorized' })
         const token = signToken(user);
-        res.status(200).json({
-            user,
-            token
-        });
+        res.status(200).json({user, token });
     },
     
     //#region ForgotPassword WF
@@ -98,8 +90,8 @@ module.exports = {
             'local.email': email
         })); //await User.findOne(query);
         if (!foundUser)
-            return res.status(401).json({
-                error: 'unauthorized'
+            return res.status(400).json({
+                error: 'bad request'
             });
 
         let forgotPwdToken = signToken(foundUser);
@@ -125,7 +117,7 @@ module.exports = {
                 isValid: true,
                 token: req.get('authorization') || req.query.token
             });
-        return res.status(401).json({
+        return res.status(400).json({
             isValid: false,
             token: null
         });
@@ -137,17 +129,17 @@ module.exports = {
 
         let foundUser = req.user; //await User.findOne(query);
         if (!foundUser)
-            return res.status(401).json({
+            return res.status(400).json({
                 error: 'no user found!'
             });
 
         if (!foundUser.comparePassword(oldPassword))
-            return res.status(401).json({
+            return res.status(400).json({
                 error: 'old password does not match!'
             });
 
         if (!newPassword)
-            return res.status(401).json({
+            return res.status(400).json({
                 error: 'cannot set empty password'
             })
         try {
@@ -172,7 +164,7 @@ module.exports = {
         let phone = req.body.phone;
         let user = req.user;
         if(!user || !phone)
-            return res.status(401).json({error:'unauthorized'});
+            return res.status(400).json({error:'bad request'});
 
         try {
             let newOTP = await getOTP(user);
@@ -197,14 +189,14 @@ module.exports = {
         let user = req.user;
         try{
             if (!user || !token)
-                return res.status(401).json({error:'unauthorized'});
+                return res.status(400).json({error:'bad request'});
 
             if(!otp.verify(user,token))
-                return res.status(401).json({error:'unauthorized'});
+                return res.status(401).json({error:'invalid otp'});
                 
-            let validOTP = await OTP.findOne({sendTo:user.unverifiedPhone, OTP:token})    
-            if(!validOTP)
-                return res.status(401).json({error:'unauthorized'})
+            let validUserOTP = await OTP.findOne({sendTo:user.unverifiedPhone, OTP:token})    
+            if (!validUserOTP)
+                return res.status(400).json({error:'bad request'})
             
             user.local.phoneVerified = true;
             user.local.phone = user.local.unverifiedPhone;
