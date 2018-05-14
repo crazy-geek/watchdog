@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 
 //# routes
 app.use('/user', require('./routes/users'))
+app.use('/auth', require('./routes/auth'))
 
 //# server start
 const port = process.env.PORT || 3002;

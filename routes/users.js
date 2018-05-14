@@ -54,5 +54,5 @@ router.route('/oauth/facebook')
     passport.authenticate('facebook', {session: false}),
     userController.facebookAuthentication);   
     
-    
+
 module.exports = router;

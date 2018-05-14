@@ -1,6 +1,5 @@
 const JWT = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-//const passport = require('passport')
 const User = require('../models/user');
 const OTP = require('../models/otp');
 const otp = require('../helpers/otphelper');
@@ -133,8 +132,8 @@ module.exports = {
     },
 
     changePassword: async (req, res, next) => {
-        let oldPassword = req.body.oldpassword;
-        let newPassword = req.body.newpassword;
+        let oldPassword = req.body.oldPassword;
+        let newPassword = req.body.newPassword;
 
         let foundUser = req.user; //await User.findOne(query);
         if (!foundUser)

@@ -38,21 +38,8 @@ var userSchema = new schema({
         },
         name: String
     },
-    // remove following props after testing
-    // name:String,
-    // phone: String,
-    // email:{
-    //     type:String,
-    //     unique:true,
-    //     lowercase:true
-    // },
-    // password: String,
-    // phoneVerified:{
-    //     type: Boolean,
-    //     default:false
-    // }
 });
-//this method witll fire before save action
+//this method will fire before save action
 userSchema.pre('save', async function(next){
     if(this.authMethod !== 'local')
         next();
@@ -67,6 +54,7 @@ userSchema.pre('save', async function(next){
 
 userSchema.methods.comparePassword = async function(password){
     try{
+        console.log(password,this.local.password)
         return await bcrypt.compare(password, this.local.password);
     }catch(error){
         throw new Error(error);
